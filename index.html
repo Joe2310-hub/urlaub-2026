@@ -293,6 +293,61 @@
         .check-lbl { font-size:14px; flex:1; }
         .check-item.checked .check-lbl { text-decoration:line-through; color:var(--text3); }
 
+        /* ── PIN SCREEN ───────────────────────── */
+        .pin-screen {
+            position:fixed; inset:0; z-index:9999;
+            background:var(--bg);
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            padding:32px 24px;
+        }
+        .pin-screen.hidden { display:none; }
+        .pin-logo { font-size:52px; margin-bottom:12px; }
+        .pin-title {
+            font-size:26px; font-weight:800; letter-spacing:-1px;
+            background:linear-gradient(135deg,#FFD700,#FF8C00);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            background-clip:text; margin-bottom:6px;
+        }
+        .pin-sub { font-size:13px; color:var(--text3); margin-bottom:36px; }
+        .pin-dots {
+            display:flex; gap:14px; margin-bottom:32px; height:16px;
+        }
+        .pin-dot {
+            width:14px; height:14px; border-radius:50%;
+            border:2px solid var(--text3); background:transparent;
+            transition:all .2s;
+        }
+        .pin-dot.filled { background:var(--gold); border-color:var(--gold); }
+        .pin-dot.error  { background:var(--red);  border-color:var(--red); }
+        .pin-pad {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:12px; width:100%; max-width:280px;
+        }
+        .pin-key {
+            background:var(--card); border:1px solid var(--border2);
+            border-radius:var(--radius); padding:18px 0;
+            font-size:22px; font-weight:600; text-align:center;
+            cursor:pointer; color:var(--text);
+            transition:background .15s, transform .1s;
+            user-select:none; -webkit-user-select:none;
+        }
+        .pin-key:active { background:#252540; transform:scale(.94); }
+        .pin-key.del { color:var(--text2); font-size:18px; }
+        .pin-key.empty { background:transparent; border-color:transparent; cursor:default; }
+        .pin-error-msg {
+            margin-top:20px; font-size:13px; color:var(--red);
+            font-weight:500; min-height:20px; text-align:center;
+        }
+        @keyframes shake {
+            0%,100%{transform:translateX(0)}
+            20%{transform:translateX(-8px)}
+            40%{transform:translateX(8px)}
+            60%{transform:translateX(-6px)}
+            80%{transform:translateX(6px)}
+        }
+        .shake { animation:shake .4s ease; }
+
         /* ── DAY DETAIL OVERLAY ───────────────── */
         .day-overlay {
             position:fixed; inset:0; z-index:2000;
@@ -409,6 +464,34 @@
         <span class="nav-icon">📋</span><span class="nav-lbl">Info</span>
     </a>
 </nav>
+
+<!-- ══ PIN SCREEN ══════════════════════════════ -->
+<div class="pin-screen" id="pin-screen">
+    <div class="pin-logo">🌊</div>
+    <div class="pin-title">Urlaub 2026</div>
+    <p class="pin-sub">PIN eingeben</p>
+    <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-pad">
+        <div class="pin-key" onclick="pinKey('1')">1</div>
+        <div class="pin-key" onclick="pinKey('2')">2</div>
+        <div class="pin-key" onclick="pinKey('3')">3</div>
+        <div class="pin-key" onclick="pinKey('4')">4</div>
+        <div class="pin-key" onclick="pinKey('5')">5</div>
+        <div class="pin-key" onclick="pinKey('6')">6</div>
+        <div class="pin-key" onclick="pinKey('7')">7</div>
+        <div class="pin-key" onclick="pinKey('8')">8</div>
+        <div class="pin-key" onclick="pinKey('9')">9</div>
+        <div class="pin-key empty"></div>
+        <div class="pin-key" onclick="pinKey('0')">0</div>
+        <div class="pin-key del" onclick="pinDel()">⌫</div>
+    </div>
+    <div class="pin-error-msg" id="pin-error"></div>
+</div>
 
 <!-- ══ DAY DETAIL OVERLAY ══════════════════════ -->
 <div class="day-overlay" id="day-overlay">
@@ -728,6 +811,60 @@
 </section>
 
 <script>
+/* ── PIN PROTECTION ────────────────────────── */
+const PIN_HASH = '21945e7f31fb51b4fccc6947a26b2573b9bc4763ae10b6bd1b59afda8959aab3';
+let pinEntry = '';
+
+async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function initPin() {
+    if (sessionStorage.getItem('auth') === PIN_HASH) {
+        document.getElementById('pin-screen').classList.add('hidden');
+    }
+}
+
+function updateDots() {
+    for (let i = 0; i < 4; i++) {
+        const d = document.getElementById('d'+i);
+        d.className = 'pin-dot' + (i < pinEntry.length ? ' filled' : '');
+    }
+}
+
+async function pinKey(k) {
+    if (pinEntry.length >= 4) return;
+    pinEntry += k;
+    updateDots();
+    if (pinEntry.length === 4) {
+        const h = await sha256(pinEntry);
+        if (h === PIN_HASH) {
+            sessionStorage.setItem('auth', PIN_HASH);
+            document.getElementById('pin-screen').classList.add('hidden');
+        } else {
+            document.getElementById('pin-error').textContent = 'Falsche PIN — bitte nochmal';
+            const dots = document.getElementById('pin-dots');
+            dots.classList.add('shake');
+            for (let i=0;i<4;i++) document.getElementById('d'+i).className='pin-dot error';
+            setTimeout(() => {
+                dots.classList.remove('shake');
+                pinEntry = '';
+                updateDots();
+                document.getElementById('pin-error').textContent = '';
+            }, 700);
+        }
+    }
+}
+
+function pinDel() {
+    pinEntry = pinEntry.slice(0,-1);
+    updateDots();
+    document.getElementById('pin-error').textContent = '';
+}
+
+initPin();
+
 /* ── DAY DETAIL DATA ───────────────────────── */
 const DAY_DETAIL = [
     {
