@@ -195,6 +195,12 @@
         .act-item {
             background:var(--card); border:1px solid var(--border2);
             border-radius:var(--radius-sm); padding:13px;
+            text-decoration:none; color:var(--text); display:block;
+            position:relative;
+        }
+        .act-item::after {
+            content:'📍'; position:absolute; top:8px; right:8px;
+            font-size:11px; opacity:0.5;
         }
         .act-icon { font-size:20px; margin-bottom:6px; }
         .act-name { font-size:13px; font-weight:600; margin-bottom:2px; }
@@ -204,6 +210,12 @@
         .rest-card {
             background:var(--card); border:1px solid var(--border2);
             border-radius:var(--radius); padding:16px; margin-bottom:10px;
+            text-decoration:none; color:var(--text); display:block;
+            position:relative;
+        }
+        .rest-card::after {
+            content:'📍 Karte'; position:absolute; top:14px; right:14px;
+            font-size:11px; color:var(--text3);
         }
         .rest-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px; }
         .rest-name { font-size:15px; font-weight:700; }
@@ -621,30 +633,30 @@
 
     <div class="cat-title">🏖️ In Misdroy</div>
     <div class="act-grid">
-        <div class="act-item"><div class="act-icon">🏖️</div><div class="act-name">Strand</div><div class="act-info">Feiner Sand · kostenlos · ideal für Kleinkinder</div></div>
-        <div class="act-item"><div class="act-icon">🌊</div><div class="act-name">Seebrücke</div><div class="act-info">395m · Cafés · Schiffe nach Swinemünde</div></div>
-        <div class="act-item"><div class="act-icon">🐠</div><div class="act-name">Ozeaneum</div><div class="act-info">10–17h · Haie · 16m Tunnel</div></div>
-        <div class="act-item"><div class="act-icon">🏛️</div><div class="act-name">Miniaturpark</div><div class="act-info">Bauwerke 1:25 · Spielzone</div></div>
-        <div class="act-item"><div class="act-icon">🎭</div><div class="act-name">Wachsfiguren</div><div class="act-info">ab 10h · Flipper · 100 Figuren</div></div>
-        <div class="act-item"><div class="act-icon">🪁</div><div class="act-name">Drachen steigen</div><div class="act-info">Am Strand · kostenlos</div></div>
-        <div class="act-item"><div class="act-icon">⭐</div><div class="act-name">Walk of Fame</div><div class="act-info">Strandpromenade · kostenlos</div></div>
-        <div class="act-item"><div class="act-icon">🔭</div><div class="act-name">Planetarium</div><div class="act-info">7m Kuppel · Weltraum</div></div>
+        <a href="https://maps.google.com/?q=Plaz+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🏖️</div><div class="act-name">Strand</div><div class="act-info">Feiner Sand · kostenlos · ideal für Kleinkinder</div></a>
+        <a href="https://maps.google.com/?q=Molo+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🌊</div><div class="act-name">Seebrücke</div><div class="act-info">395m · Cafés · Schiffe nach Swinemünde</div></a>
+        <a href="https://maps.google.com/?q=Oceanarium+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🐠</div><div class="act-name">Ozeaneum</div><div class="act-info">10–17h · Haie · 16m Tunnel</div></a>
+        <a href="https://maps.google.com/?q=Park+Miniatur+Baltyckich+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🏛️</div><div class="act-name">Miniaturpark</div><div class="act-info">Bauwerke 1:25 · Spielzone</div></a>
+        <a href="https://maps.google.com/?q=Gabinet+Figur+Woskowych+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🎭</div><div class="act-name">Wachsfiguren</div><div class="act-info">ab 10h · Flipper · 100 Figuren</div></a>
+        <a href="https://maps.google.com/?q=Plaz+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🪁</div><div class="act-name">Drachen steigen</div><div class="act-info">Am Strand · kostenlos</div></a>
+        <a href="https://maps.google.com/?q=Promenada+Gwiazd+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">⭐</div><div class="act-name">Walk of Fame</div><div class="act-info">Strandpromenade · kostenlos</div></a>
+        <a href="https://maps.google.com/?q=Planetarium+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🔭</div><div class="act-name">Planetarium</div><div class="act-info">7m Kuppel · Weltraum</div></a>
     </div>
 
     <div class="cat-title">🚗 Ausflüge</div>
     <div class="act-grid">
-        <div class="act-item"><div class="act-icon">🚂</div><div class="act-name">Swinemünde</div><div class="act-info">12km · Touristenzug · Leuchtturm · Bernsteinmine</div></div>
-        <div class="act-item"><div class="act-icon">🌳</div><div class="act-name">Nationalpark Wollin</div><div class="act-info">Wisente · Kinder bis 4J. kostenlos · 6 km-Routen</div></div>
-        <div class="act-item"><div class="act-icon">🦕</div><div class="act-name">Dino-Park</div><div class="act-info">Baltic Dinosaur Park · lebensgroße Dinos</div></div>
-        <div class="act-item"><div class="act-icon">⚔️</div><div class="act-name">Wikingerdorf</div><div class="act-info">Insel Wolin · Geschichte erleben</div></div>
+        <a href="https://maps.google.com/?q=Swinoujscie+Poland" target="_blank" class="act-item"><div class="act-icon">🚂</div><div class="act-name">Swinemünde</div><div class="act-info">12km · Touristenzug · Leuchtturm · Bernsteinmine</div></a>
+        <a href="https://maps.google.com/?q=Wolinski+Park+Narodowy+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🌳</div><div class="act-name">Nationalpark Wollin</div><div class="act-info">Wisente · Kinder bis 4J. kostenlos · 6 km-Routen</div></a>
+        <a href="https://maps.google.com/?q=Baltic+Dinosaur+Park+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🦕</div><div class="act-name">Dino-Park</div><div class="act-info">Baltic Dinosaur Park · lebensgroße Dinos</div></a>
+        <a href="https://maps.google.com/?q=Centrum+Slowian+i+Wikingow+Wolin" target="_blank" class="act-item"><div class="act-icon">⚔️</div><div class="act-name">Wikingerdorf</div><div class="act-info">Insel Wolin · Geschichte erleben</div></a>
     </div>
 
     <div class="cat-title">🌧️ Bei Regen</div>
     <div class="act-grid">
-        <div class="act-item"><div class="act-icon">🐠</div><div class="act-name">Ozeaneum</div><div class="act-info">Indoor · Top-Wahl</div></div>
-        <div class="act-item"><div class="act-icon">🎭</div><div class="act-name">Wachsfiguren</div><div class="act-info">Indoor · Spielraum</div></div>
-        <div class="act-item"><div class="act-icon">🔭</div><div class="act-name">Planetarium</div><div class="act-info">Indoor · Show</div></div>
-        <div class="act-item"><div class="act-icon">🏛️</div><div class="act-name">Miniaturpark</div><div class="act-info">Teils Indoor</div></div>
+        <a href="https://maps.google.com/?q=Oceanarium+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🐠</div><div class="act-name">Ozeaneum</div><div class="act-info">Indoor · Top-Wahl</div></a>
+        <a href="https://maps.google.com/?q=Gabinet+Figur+Woskowych+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🎭</div><div class="act-name">Wachsfiguren</div><div class="act-info">Indoor · Spielraum</div></a>
+        <a href="https://maps.google.com/?q=Planetarium+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🔭</div><div class="act-name">Planetarium</div><div class="act-info">Indoor · Show</div></a>
+        <a href="https://maps.google.com/?q=Park+Miniatur+Baltyckich+Miedzyzdroje" target="_blank" class="act-item"><div class="act-icon">🏛️</div><div class="act-name">Miniaturpark</div><div class="act-info">Teils Indoor</div></a>
     </div>
 </section>
 
@@ -652,36 +664,36 @@
 <section class="section">
     <div class="section-title"><span class="sec-icon">🍽️</span> Restaurants</div>
 
-    <div class="rest-card">
+    <a href="https://maps.google.com/?q=Surowe+Wnetrze+Miedzyzdroje" target="_blank" class="rest-card">
         <div class="rest-header"><div class="rest-name">Surowe Wnętrze</div><div class="rest-rating">⭐ 4.9</div></div>
         <div class="rest-type">Geheimtipp · 129 Bewertungen</div>
         <div class="rest-desc">Bestbewertetes Restaurant in ganz Misdroy</div>
-    </div>
-    <div class="rest-card">
+    </a>
+    <a href="https://maps.google.com/?q=Baron+Pub+Restaurant+Miedzyzdroje" target="_blank" class="rest-card">
         <div class="rest-header"><div class="rest-name">Baron Pub & Restaurant</div><div class="rest-rating">⭐ 4.7</div></div>
         <div class="rest-type">Polnisch / Europäisch · 316 Bewertungen</div>
         <div class="rest-desc">Frühstück bis spät · breite Auswahl · familienfreundlich</div>
-    </div>
-    <div class="rest-card">
+    </a>
+    <a href="https://maps.google.com/?q=Restauracja+Dolce+Vita+Miedzyzdroje" target="_blank" class="rest-card">
         <div class="rest-header"><div class="rest-name">Restauracja Dolce Vita</div><div class="rest-rating">⭐ 4.6</div></div>
         <div class="rest-type">Italienisch · 740 Bewertungen</div>
         <div class="rest-desc">Tägl. 9:00–00:00 · Pizza, Pasta · ideal für Kinder</div>
-    </div>
-    <div class="rest-card">
+    </a>
+    <a href="https://maps.google.com/?q=Restaurant+Port+Miedzyzdroje" target="_blank" class="rest-card">
         <div class="rest-header"><div class="rest-name">Restaurant PORT</div></div>
         <div class="rest-type">Seafood · 10m vom Strand</div>
         <div class="rest-desc">Ehemaliges Seenotrettungsgebäude · einzigartiges Ambiente · Terrasse</div>
-    </div>
-    <div class="rest-card">
+    </a>
+    <a href="https://maps.google.com/?q=Octopus+Restaurant+Miedzyzdroje" target="_blank" class="rest-card">
         <div class="rest-header"><div class="rest-name">Octopus Restaurant</div></div>
         <div class="rest-type">Mediterran · Meeresfrüchte, Pizza, Pasta</div>
         <div class="rest-desc">Breite Auswahl · auch für Kinder</div>
-    </div>
-    <div class="rest-card">
+    </a>
+    <a href="https://maps.google.com/?q=Port+rybacki+Miedzyzdroje" target="_blank" class="rest-card">
         <div class="rest-header"><div class="rest-name">Fischbratereien am Pier</div></div>
         <div class="rest-type">Frischer Fisch · direkt vom Boot</div>
         <div class="rest-desc">Tagsüber · günstig · Strandfeeling</div>
-    </div>
+    </a>
 </section>
 
 <div class="divider"></div>
