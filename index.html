@@ -293,6 +293,74 @@
         .check-lbl { font-size:14px; flex:1; }
         .check-item.checked .check-lbl { text-decoration:line-through; color:var(--text3); }
 
+        /* ── DAY DETAIL OVERLAY ───────────────── */
+        .day-overlay {
+            position:fixed; inset:0; z-index:2000;
+            background:var(--bg);
+            transform:translateY(100%);
+            transition:transform .35s cubic-bezier(.32,.72,0,1);
+            overflow-y:auto;
+            padding-bottom:40px;
+        }
+        .day-overlay.open { transform:translateY(0); }
+
+        .overlay-header {
+            position:sticky; top:0; z-index:10;
+            background:rgba(13,13,13,0.96);
+            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border2);
+            padding:16px 16px 14px;
+            display:flex; align-items:center; gap:12px;
+        }
+        .back-btn {
+            background:rgba(255,255,255,0.08); border:none;
+            color:var(--text); font-size:18px; cursor:pointer;
+            width:36px; height:36px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+        }
+        .overlay-title { flex:1; }
+        .overlay-tag { font-size:11px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:.8px; }
+        .overlay-date { font-size:17px; font-weight:700; margin-top:1px; }
+        .overlay-emoji { font-size:28px; }
+
+        .timeline { padding:20px 16px 0; }
+
+        .tl-block { margin-bottom:24px; }
+        .tl-time {
+            display:flex; align-items:center; gap:8px;
+            font-size:12px; font-weight:700; color:var(--gold);
+            text-transform:uppercase; letter-spacing:1px;
+            margin-bottom:10px;
+        }
+        .tl-time::after {
+            content:''; flex:1; height:1px;
+            background:rgba(255,215,0,0.15);
+        }
+        .tl-item {
+            background:var(--card); border:1px solid var(--border2);
+            border-radius:var(--radius-sm); padding:14px;
+            margin-bottom:8px; display:flex; gap:12px; align-items:flex-start;
+        }
+        .tl-icon { font-size:22px; flex-shrink:0; margin-top:1px; }
+        .tl-body { flex:1; }
+        .tl-name { font-size:14px; font-weight:600; margin-bottom:3px; }
+        .tl-desc { font-size:13px; color:var(--text2); line-height:1.5; }
+        .tl-badge {
+            display:inline-block; background:rgba(255,215,0,0.1);
+            color:var(--gold); font-size:11px; font-weight:600;
+            padding:2px 8px; border-radius:50px; margin-top:6px;
+        }
+        .tl-badge.red { background:rgba(255,107,107,0.12); color:var(--red); }
+        .tl-badge.green { background:rgba(80,200,120,0.12); color:#50c878; }
+
+        .day-tip {
+            background:rgba(255,215,0,0.06); border:1px solid rgba(255,215,0,0.2);
+            border-radius:var(--radius); padding:14px 16px; margin:0 16px 20px;
+            font-size:13px; color:var(--text2); line-height:1.6;
+        }
+        .day-tip strong { color:var(--gold); }
+
         /* ── SCROLLBAR ────────────────────────── */
         ::-webkit-scrollbar { width:4px; }
         ::-webkit-scrollbar-track { background:var(--bg); }
@@ -341,6 +409,20 @@
         <span class="nav-icon">📋</span><span class="nav-lbl">Info</span>
     </a>
 </nav>
+
+<!-- ══ DAY DETAIL OVERLAY ══════════════════════ -->
+<div class="day-overlay" id="day-overlay">
+    <div class="overlay-header">
+        <button class="back-btn" onclick="closeDay()">←</button>
+        <div class="overlay-title">
+            <div class="overlay-tag" id="ov-tag"></div>
+            <div class="overlay-date" id="ov-date"></div>
+        </div>
+        <span class="overlay-emoji" id="ov-emoji"></span>
+    </div>
+    <div class="day-tip" id="ov-tip"></div>
+    <div class="timeline" id="ov-timeline"></div>
+</div>
 
 <!-- ══ TAGESPLAN ══════════════════════════════ -->
 <span class="anchor" id="plan"></span>
@@ -588,6 +670,200 @@
 </section>
 
 <script>
+/* ── DAY DETAIL DATA ───────────────────────── */
+const DAY_DETAIL = [
+    {
+        tip: 'Tankstelle vorher volltanken — in Polen günstiger. Snacks & Getränke für die Fahrt einpacken.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🚗', name:'Abfahrt Richtung Lübeck', desc:'Frühzeitig starten für entspannte Anreise. Route: Richtung A1/A7 Nord.', badge:'' },
+                { icon:'☕', name:'Kaffeepause einplanen', desc:'Mit Kleinkindern alle 2h eine Pause einlegen.', badge:'Tipp: Raststation Dreieck Hamburg' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'🏨', name:'Check-in Premier Inn', desc:'Ab 15:00 Uhr. Zimmer direkt am Lübecker Hauptbahnhof.', badge:'Buchungsnr. 5585550678' },
+                { icon:'🛏️', name:'Einrichten & frisch machen', desc:'Kurze Pause nach der langen Fahrt.', badge:'' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🚶', name:'Lübecker Altstadt', desc:'15 Min. Fußweg. Holstentor, Marienkirche, historischer Marktplatz.', badge:'UNESCO Weltkulturerbe' },
+                { icon:'🍽️', name:'Abendessen in der Altstadt', desc:'Viele Restaurants rund um den Marktplatz. Probiert das Lübecker Marzipan!', badge:'' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Check-out bis 12:00! Gepäck vorher ins Auto laden. Route Richtung Rostock → Stralsund → Grenze → Swinemünde → Misdroy.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🍳', name:'Frühstück im Hotel', desc:'Premier Inn bietet Frühstücksbüfett (Mo–Fr 6:30–10:30, Sa/So 7–11 Uhr).', badge:'Gegen Aufpreis' },
+                { icon:'🧳', name:'Check-out bis 12:00 Uhr', desc:'Gepäck schon abends vorbereiten. Buchungsnr. 5585550678.', badge:'' }
+            ]},
+            { time:'☀️ Fahrt (~5,5h)', items:[
+                { icon:'🛣️', name:'Route nach Misdroy', desc:'A1 → Hamburg → A20 → Rostock → Grenze Świnoujście → Misdroy (B111).', badge:'~460 km' },
+                { icon:'🥪', name:'Mittagspause einplanen', desc:'Raststation oder kleiner Supermarkt unterwegs.', badge:'Tipp: 2 Pausen mit Kindern' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'🏠', name:'Ankunft & Check-in', desc:'Check-in ab 15:00 Uhr. Schlüssel im Schließfach vor Ort. WAVEVIEW 10th Floor.', badge:'Adresse: 70E Gryfa Pomorskiego' },
+                { icon:'🌊', name:'Erster Blick aufs Meer', desc:'Kurzer Spaziergang zum Strand — einfach ankommen und die Ostsee genießen.', badge:'' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🛒', name:'Kleineinkauf', desc:'Supermarkt für Grundversorgung. Rossmann oder DM vor Ort.', badge:'' },
+                { icon:'🍽️', name:'Abendessen', desc:'Leicht essen nach langem Fahrtag — Dolce Vita oder Pier-Imbiss.', badge:'' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Strandkorb früh mieten (~50 PLN/Tag) — beste Plätze sind morgens weg. Sonnencreme nicht vergessen!',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🏖️', name:'Strandkorb mieten', desc:'Frühzeitig zum Strand. Strandkorb: ~50 PLN/Tag. Liegestuhl: ~18 €/Tag.', badge:'~50 zł/Tag' },
+                { icon:'🪁', name:'Drachen steigen lassen', desc:'Perfekt für die Kleinen am offenen Strand. Wind von der Ostsee ideal.', badge:'Kostenlos' }
+            ]},
+            { time:'☀️ Mittags', items:[
+                { icon:'🍦', name:'Eis auf dem Pier', desc:'Seebrücke ist 395m lang — Cafés und Süßwarenläden entlang des Piers.', badge:'' },
+                { icon:'🐟', name:'Mittagessen am Pier', desc:'Frischer Fisch direkt an den Imbissen auf dem Pier.', badge:'' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'🌊', name:'Nachmittags Strand', desc:'Einfach im Sand spielen, Sandburgen bauen. Der Strand ist ideal für Kleinkinder.', badge:'Feiner Sand, kaum Steine' },
+                { icon:'⭐', name:'Walk of Fame', desc:'Strandpromenade mit Handabdrücken polnischer Stars. Spaziergang entlang der Promenade.', badge:'Kostenlos' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🍽️', name:'Abendessen Baron Pub', desc:'Polnisch/Europäisch · ⭐ 4.7 · gute Auswahl, familienfreundlich.', badge:'Empfehlung' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Morgens ins Ozeaneum — vor 11 Uhr ist es noch ruhig. Danach gehts an den Strand.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🐠', name:'Ozeaneum (ab 10:00)', desc:'3-stöckiger Wasserpark, 220 Tonnen Wasser. 16m Tunnel-Aquarium mit Haien & Rochen.', badge:'10:00–17:00 Uhr' },
+                { icon:'🦈', name:'Highlight: Haie hautnah', desc:'Durch den gläsernen Tunnel unter den Haien hindurch. Kinder lieben es!', badge:'Multimedia-Raum für Kinder' }
+            ]},
+            { time:'☀️ Mittags', items:[
+                { icon:'🍽️', name:'Mittagessen in der Stadt', desc:'Dolce Vita (tägl. 9–24h) oder Surowe Wnętrze (⭐ 4.9).', badge:'' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'🏖️', name:'Strand & Entspannen', desc:'Nachmittag gehört dem Strand. Sandburgen, Planschen, Relaxen.', badge:'' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🐟', name:'Fischereihafen', desc:'Abends am Hafen: Fischboote kehren zurück, frischen Fisch direkt kaufen.', badge:'Strandrestaurant vor Ort' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Frühzeitig starten — Swinemünde liegt nur 12km entfernt (ca. 15 Min. Fahrt). Ganz entspannter Tagesausflug.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🚗', name:'Fahrt nach Swinemünde', desc:'Nur 12km, ca. 15 Min. Fahrt. Parkplätze in Strandnähe vorhanden.', badge:'Świnoujście' },
+                { icon:'🚂', name:'Swinemünde Express', desc:'Grüner Touristenzug durch die Stadt. 1 Stunde Tour, 6 Haltestellen. Kinder lieben den kleinen Zug!', badge:'~1h Tour' }
+            ]},
+            { time:'☀️ Mittags', items:[
+                { icon:'🗼', name:'Leuchtturm', desc:'65m hoch — höchster Polens! 300 Stufen. Panoramablick über Usedom & Ostsee.', badge:'45 PLN / Person' },
+                { icon:'🍽️', name:'Mittagessen in Swinemünde', desc:'Viele Restaurants an der Promenade und am Hafen.', badge:'' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'💎', name:'Bernsteinmine', desc:'Jeder bekommt ein Sieb und gräbt selbst nach Bernstein. Gefundenes darf behalten werden!', badge:'15 PLN / Person' },
+                { icon:'🏰', name:'Fort Gerhard (optional)', desc:'Lebendes Militärmuseum mit Führung. Auch für Kinder spannend.', badge:'Kostenpflichtig' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🚗', name:'Zurück nach Misdroy', desc:'Entspannter Rückweg. Abendessen zuhause oder unterwegs.', badge:'15 Min.' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Verpflegung einpacken! Im Nationalpark gibt es kaum Restaurants. Kinder bis 4 Jahre haben freien Eintritt.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🎒', name:'Vorbereitung', desc:'Rucksack packen: Snacks, Wasser, Insektenschutz, festes Schuhwerk für alle.', badge:'' },
+                { icon:'🌳', name:'Nationalpark Wollin', desc:'6 kinderfreundliche Wanderrouten, alle Kinderwagen-geeignet. Eintritt normal 6 PLN.', badge:'Kinder bis 4J. kostenlos!' }
+            ]},
+            { time:'☀️ Mittags', items:[
+                { icon:'🧺', name:'Picknick im Nationalpark', desc:'Schöne Picknickplätze im Wald. Mitgebrachte Snacks genießen.', badge:'Tipp: Vorher kaufen' },
+                { icon:'🦌', name:'Wisente beobachten', desc:'Der Park beherbergt echte Wisente (Europäische Bisons). Auch Seeadler-Paare leben hier.', badge:'Naturschutzgebiet' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'⛰️', name:'Gosan-Berg (95m)', desc:'Einer der höchsten Punkte an der polnischen Ostseeküste. Atemberaubende Aussicht!', badge:'Lohnender Aufstieg' },
+                { icon:'🌲', name:'Buchenwälder & Steilküste', desc:'Magische Atmosphäre: 300 Jahre alte Eichen, Klippen mit Ostseeblick.', badge:'' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🍽️', name:'Restaurant PORT', desc:'Besonderes Abendessen nach dem Naturerlebnis. 10m vom Strand, tolles Ambiente.', badge:'Empfehlung für heute Abend' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Heute ist Misdroy dran! Alles zu Fuß erreichbar. Gutes Wetterprogramm für einen Bummel durch die Stadt.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🏛️', name:'Baltischer Miniaturpark', desc:'Modelle berühmter Bauwerke aus Polen, Deutschland & der Ostseeregion im Maßstab 1:25. Spielzone für Kinder!', badge:'Offen ab Vormittag' },
+                { icon:'🏗️', name:'Highlight: Brandenburger Tor', desc:'Das Original auf 500m² Fläche im Miniaturformat. Kinder können alles anfassen.', badge:'' }
+            ]},
+            { time:'☀️ Mittags', items:[
+                { icon:'🎭', name:'Wachsfigurenkabinett', desc:'100 lebensgroße Wachsfiguren auf 2 Etagen. Foto mit Schwarzenegger, Papst & Co.! Spielraum mit Flipper & Airhockey.', badge:'Ab 10:00 Uhr' },
+                { icon:'🍽️', name:'Mittagessen', desc:'Surowe Wnętrze (⭐ 4.9) oder Dolce Vita in der Nähe der Promenade.', badge:'' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'⭐', name:'Walk of Fame', desc:'Handabdrücke polnischer Stars in der Promenada Gwiazd. Schöner Nachmittagsspaziergang.', badge:'Kostenlos' },
+                { icon:'🔭', name:'Planetarium (optional)', desc:'7m Kuppel mit Weltraumshow. Für die Kinder je nach Energie.', badge:'' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🐟', name:'Fischereihafen', desc:'Abends am Hafen frischen Fisch vom Boot kaufen. Strandrestaurant direkt daneben.', badge:'Geheimtipp' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Frühzeitig starten — der Dino-Park braucht leicht 3–4 Stunden. Danach noch Zeit für den Strand.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🦕', name:'Baltic Dinosaur Park', desc:'Lebensgroße Dinosauriermodelle in natürlicher Umgebung. Interaktive Lernstationen, Spielplatz und Picknickbereich.', badge:'Für Kinder ab 2 Jahren ideal' },
+                { icon:'⚔️', name:'Alternative: Wikingerdorf', desc:'Auf der Insel Wolin. Wikinger-Leben hautnah erleben, Handwerksvorführungen, Zeitreise für Groß und Klein.', badge:'Jährliches Festival' }
+            ]},
+            { time:'☀️ Mittags', items:[
+                { icon:'🍽️', name:'Mittagessen vor Ort', desc:'Restaurant/Imbiss am Dino-Park oder Picknick mitbringen.', badge:'' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'🏖️', name:'Rückweg & Strand', desc:'Nachmittags zurück nach Misdroy. Noch ein letzter Nachmittag am Strand.', badge:'' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🍽️', name:'Abendessen Baron oder Octopus', desc:'Baron Pub & Restaurant (⭐ 4.7) oder Octopus für Meeresfrüchte & Pizza.', badge:'' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Letzter Tag in Misdroy — in Ruhe genießen. Abends nochmal alles aufsaugen.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'🏖️', name:'Letzter Strandmorgen', desc:'Alles nochmal in Ruhe genießen. Sandburg für die Erinnerung bauen.', badge:'' },
+                { icon:'🛍️', name:'Souvenirs & Andenken', desc:'Bernsteinschmuck und polnische Mitbringsel in der Promenada Gwiazd.', badge:'Tipp: Kantor nutzen!' }
+            ]},
+            { time:'☀️ Mittags', items:[
+                { icon:'🌊', name:'Pier & Eis', desc:'Letzter Bummel über die 395m lange Seebrücke. Ein letztes Eis am Meer.', badge:'' },
+                { icon:'📸', name:'Fotos & Erinnerungen', desc:'Gruppenfotos auf dem Pier mit Blick aufs Meer.', badge:'' }
+            ]},
+            { time:'🌆 Nachmittags', items:[
+                { icon:'🧳', name:'Koffer packen', desc:'Alles vorbereiten für Check-out morgen früh (08–11 Uhr). Koffer können im Flur stehen.', badge:'' },
+                { icon:'🌊', name:'Letztes Bad', desc:'Noch einmal rein ins kühle Ostseewasser.', badge:'' }
+            ]},
+            { time:'🌙 Abends', items:[
+                { icon:'🍽️', name:'Abschiedsessen Restaurant PORT', desc:'Das besondere Restaurant im ehemaligen Seenotrettungsgebäude. 10m vom Strand. Perfekter Abschluss!', badge:'Empfehlung des Abends' }
+            ]}
+        ]
+    },
+    {
+        tip: 'Check-out 08–11 Uhr! Koffer abends vorher packen. Mit Kindern früh frühstücken und entspannt starten.',
+        blocks: [
+            { time:'🌅 Morgens', items:[
+                { icon:'☕', name:'Letztes Frühstück', desc:'In Ruhe frühstücken. Kühlschrank leeren, Reste verzehren.', badge:'' },
+                { icon:'🏠', name:'Check-out 08:00–11:00 Uhr', desc:'Schlüssel zurückgeben, Apartment kontrollieren. Buchungsnr. 5258683776.', badge:'Bis 11:00 Uhr!' }
+            ]},
+            { time:'☀️ Heimfahrt', items:[
+                { icon:'🚗', name:'Fahrt nach Hause (~5,5h)', desc:'Route: Misdroy → Swinemünde → Grenze → A20 → Hamburg → Richtung Düsseldorf.', badge:'~460 km' },
+                { icon:'🥪', name:'Pausen einplanen', desc:'Mit Kindern ca. alle 2h eine Pause. Snacks vorher kaufen.', badge:'Entspannt fahren' }
+            ]},
+            { time:'🌙 Ankunft', items:[
+                { icon:'🏠', name:'Zuhause!', desc:'Schöne Erinnerungen auspacken — und nächstes Jahr wieder?', badge:'🌊 Bis zum nächsten Mal!' }
+            ]}
+        ]
+    }
+];
+
 /* ── DATA ──────────────────────────────────── */
 const DAYS = [
     { date:'2026-06-03', tag:'Tag 0', label:'Mi 3. Juni', emoji:'🚗', title:'Abreise nach Lübeck', desc:'Fahrt nach Lübeck. Check-in Premier Inn City Centre ab 15:00. Abends: Altstadt bummeln.', tags:['Lübeck','~5,5h Fahrt','Premier Inn'] },
@@ -613,12 +889,13 @@ const PACK = {
 function renderDays() {
     const c = document.getElementById('days-container');
     const today = new Date(); today.setHours(0,0,0,0);
-    DAYS.forEach(d => {
+    DAYS.forEach((d, i) => {
         const dd = new Date(d.date); dd.setHours(0,0,0,0);
         const isToday = dd.getTime() === today.getTime();
         const isPast  = dd < today;
         const div = document.createElement('div');
         div.className = 'day-card' + (isToday?' today':'') + (isPast?' past':'');
+        div.style.cursor = 'pointer';
         div.innerHTML = `
             <div class="day-header">
                 <span class="day-tag">${d.tag}</span>
@@ -627,9 +904,50 @@ function renderDays() {
             </div>
             <div class="day-title">${d.title}</div>
             <div class="day-desc">${d.desc}</div>
-            <div class="day-tags">${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+            <div class="day-tags">${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}
+                <span class="tag" style="margin-left:auto;color:var(--gold);background:rgba(255,215,0,0.1);">Details →</span>
+            </div>`;
+        div.addEventListener('click', () => openDay(i));
         c.appendChild(div);
     });
+}
+
+/* ── DAY DETAIL ────────────────────────────── */
+function openDay(i) {
+    const d  = DAYS[i];
+    const dd = DAY_DETAIL[i];
+    document.getElementById('ov-tag').textContent   = d.tag + ' · ' + d.label;
+    document.getElementById('ov-date').textContent  = d.title;
+    document.getElementById('ov-emoji').textContent = d.emoji;
+    document.getElementById('ov-tip').innerHTML     = '💡 <strong>Tipp:</strong> ' + dd.tip;
+
+    const tl = document.getElementById('ov-timeline');
+    tl.innerHTML = '';
+    dd.blocks.forEach(block => {
+        const section = document.createElement('div');
+        section.className = 'tl-block';
+        section.innerHTML = `<div class="tl-time">${block.time}</div>` +
+            block.items.map(it => `
+                <div class="tl-item">
+                    <span class="tl-icon">${it.icon}</span>
+                    <div class="tl-body">
+                        <div class="tl-name">${it.name}</div>
+                        <div class="tl-desc">${it.desc}</div>
+                        ${it.badge ? `<span class="tl-badge">${it.badge}</span>` : ''}
+                    </div>
+                </div>`).join('');
+        tl.appendChild(section);
+    });
+
+    const overlay = document.getElementById('day-overlay');
+    overlay.scrollTop = 0;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDay() {
+    document.getElementById('day-overlay').classList.remove('open');
+    document.body.style.overflow = '';
 }
 
 /* ── COUNTDOWN ─────────────────────────────── */
